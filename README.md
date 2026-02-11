@@ -363,8 +363,8 @@ Este projeto é licenciado sob a MIT License - veja LICENSE para detalhes.
 
 ## 👨‍💻 Autor
 
-Desenvolvido como ferramenta de monitoramento de preços inteligente.
-
+onerddev
 ---
 
 **Dúvidas?** Consulte a documentação ou abra uma issue! 🚀
+

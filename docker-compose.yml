@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: price-tracker-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: price_tracker
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - price-tracker-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicação Python com Streamlit
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: price-tracker-app
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: price_tracker
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - price-tracker-network
+    command: streamlit run main.py --server.port=8501 --server.address=0.0.0.0
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  price-tracker-network:
+    driver: bridge

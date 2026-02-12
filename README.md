@@ -1,104 +1,92 @@
-Docker
+# Docker
 
-Aplicação para monitoramento de preços de produtos em e-commerce, com alertas inteligentes e visualização de histórico em tempo real.
+Aplicação backend para monitoramento de preços de produtos em e-commerce, com armazenamento de histórico e sistema de alertas.
 
-Características
+---
 
-Funcionalidades principais:
+## 1. Visão Geral
 
-Dashboard com gráficos de preços
+O sistema permite:
 
-Scraping automático de preços em sites de e-commerce
+- Cadastro de produtos para monitoramento
+- Extração automática de preços via scraping
+- Armazenamento de histórico de preços
+- Disparo de alertas quando o valor atinge a meta definida
+- Execução via Docker ou instalação local
 
-Sistema de alertas quando o preço atinge a meta
+A aplicação funciona como serviço backend e pode ser integrada a outros sistemas.
 
-Histórico completo de variação de preços
+---
 
-Notificações por email (SMTP ou SendGrid)
+## 2. Tecnologias Utilizadas
 
-Interface web com Streamlit
+### Backend
+- Python 3.11+
+- SQLAlchemy
+- BeautifulSoup4
+- Requests
 
-Containerização com Docker e Docker Compose
+### Banco de Dados
+- PostgreSQL 16
 
-Design responsivo
+### Infraestrutura
+- Docker
+- Docker Compose
 
-Tecnologias Utilizadas
-Backend
+### Integrações Opcionais
+- SendGrid
+- SMTP (Gmail)
 
-Python 3.11+
+---
 
-SQLAlchemy
+## 3. Pré-requisitos
 
-BeautifulSoup4
+### Execução Local
+- Python 3.11 ou superior
+- PostgreSQL 12 ou superior
+- pip
 
-Requests
+### Execução com Docker
+- Docker
+- Docker Compose
 
-Banco de Dados
+---
 
-PostgreSQL 16
+## 4. Instalação
 
-Frontend
+### 4.1 Instalação com Docker (Recomendado)
 
-Streamlit
+1. Acesse o diretório do projeto:
 
-Plotly
-
-Pandas
-
-Infraestrutura
-
-Docker
-
-Docker Compose
-
-Integrações Opcionais
-
-SendGrid
-
-SMTP (Gmail)
-
-Pré-requisitos
-Instalação Local
-
-Python 3.11+
-
-PostgreSQL 12+
-
-pip
-
-Com Docker
-
-Docker
-
-Docker Compose
-
-Guia de Instalação
-Opção 1: Docker (Recomendado)
-
-Acesse a pasta do projeto:
-
+```bash
 cd docker
+```
 
+2. Inicie os containers:
 
-Inicie os containers:
-
+```bash
 docker-compose up -d
+```
 
+3. Verifique os logs:
 
-Acesse a aplicação:
-
-Interface Web: http://localhost:8501
-
-Banco de Dados: localhost:5432
+```bash
+docker-compose logs -f
+```
 
 Para parar:
 
+```bash
 docker-compose down
+```
 
-Opção 2: Instalação Local
+---
 
-Criar ambiente virtual:
+### 4.2 Instalação Local
 
+#### 1. Criar ambiente virtual
+
+```bash
 python -m venv venv
 
 # Windows
@@ -106,117 +94,46 @@ venv\Scripts\activate
 
 # Linux/Mac
 source venv/bin/activate
+```
 
+#### 2. Instalar dependências
 
-Instalar dependências:
-
+```bash
 pip install -r requirements.txt
+```
 
+#### 3. Criar banco de dados
 
-Configurar PostgreSQL:
-
+```bash
 psql -U postgres -c "CREATE DATABASE docker;"
-
 psql -U postgres -d docker -f init.sql
+```
 
+#### 4. Configurar variáveis de ambiente
 
-Criar arquivo .env:
+Criar arquivo `.env`:
 
+```
 DB_USER=postgres
 DB_PASSWORD=postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=docker
+```
 
+#### 5. Executar aplicação
 
-Iniciar aplicação:
+```bash
+python main.py
+```
 
-streamlit run main.py
+---
 
+## 5. Estrutura do Banco de Dados
 
-Como Usar
-Adicionar Produto
+### Tabela produtos
 
-Clique em "Adicionar Produto"
-
-Informe:
-
-Nome do produto
-
-URL do site
-
-Preço meta
-
-Confirme
-
-Monitorar Preços
-
-Acesse "Monitorar Preço"
-
-Selecione produtos
-
-Clique em atualizar
-
-Dashboard
-
-Acesse "Dashboard"
-
-Selecione produto
-
-Visualize:
-
-Evolução de preços
-
-Estatísticas
-
-Status de alerta
-
-Gerenciar Produtos
-
-Acesse "Gerenciar Produtos"
-
-Visualize ou exclua produtos
-
-Integração SendGrid
-
-Criar conta em:
-
-sendgrid.com
-
-Gerar API Key e usar:
-
-from notificador import NotificadorPreco
-
-notificador = NotificadorPreco(sendgrid_api_key='sua-chave-api')
-notificador.enviar_sendgrid(
-    email_destino='email@dominio.com',
-    produto_nome='Produto',
-    preco_atual=1000.00,
-    preco_meta=800.00
-)
-
-Integração SMTP Gmail
-
-Gerar App Password em:
-
-myaccount.google.com/apppasswords
-
-Exemplo:
-
-from notificador import NotificadorPreco
-
-notificador = NotificadorPreco()
-notificador.enviar_email_smtp(
-    email_origem='email@gmail.com',
-    senha='app-password',
-    email_destino='destinatario@dominio.com',
-    produto_nome='Produto',
-    preco_atual=1000.00,
-    preco_meta=800.00
-)
-
-Estrutura do Banco de Dados
-Tabela produtos
+```sql
 CREATE TABLE produtos (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
@@ -225,16 +142,24 @@ CREATE TABLE produtos (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
 
-Tabela historico_precos
+### Tabela historico_precos
+
+```sql
 CREATE TABLE historico_precos (
     id SERIAL PRIMARY KEY,
     produto_id INTEGER NOT NULL REFERENCES produtos(id) ON DELETE CASCADE,
     preco DECIMAL(10,2) NOT NULL,
     data_consulta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+```
 
-Estrutura de Arquivos
+---
+
+## 6. Estrutura do Projeto
+
+```
 docker/
 ├── main.py
 ├── tracker.py
@@ -245,35 +170,15 @@ docker/
 ├── docker-compose.yml
 ├── README.md
 └── .env
+```
 
-Segurança
+---
 
-Não compartilhe credenciais
+## 7. Exemplo de Uso Programático
 
-Use variáveis de ambiente
-
-Altere senhas padrão em produção
-
-Utilize gerenciamento de secrets em ambiente corporativo
-
-Troubleshooting
-Connection refused
-docker-compose logs postgres
-
-
-ou
-
-sudo service postgresql status
-
-Module not found
-pip install -r requirements.txt
-
-Streamlit não encontrado
-
-Ative o ambiente virtual antes de executar.
-
-Exemplo Programático
+```python
 from tracker import PriceTracker
+from notificador import NotificadorPreco
 
 db_url = "postgresql://postgres:postgres@localhost:5432/docker"
 
@@ -287,28 +192,77 @@ produto = tracker.adicionar_produto(
     preco_meta=500.00
 )
 
-tracker.monitorar_preco(produto.id)
+historico = tracker.monitorar_preco(produto.id)
 
-Deploy
-AWS EC2
-sudo apt update && sudo apt upgrade -y
+notificador = NotificadorPreco()
 
-curl -fsSL get.docker.com -o get-docker.sh
-sh get-docker.sh
+if historico:
+    preco_atual = float(historico.preco)
+    preco_meta = float(produto.preco_meta)
 
-git clone seu-repositorio
-cd docker
-docker-compose up -d
+    if notificador.verificar_alerta(
+        produto_nome=produto.nome,
+        preco_atual=preco_atual,
+        preco_meta=preco_meta
+    ):
+        print("Alerta disparado")
+```
 
-Heroku
-heroku create sua-app
-git push heroku main
+---
 
-Licença
+## 8. Integração com Email
+
+### SendGrid
+
+Criar conta em:
+
+sendgrid.com
+
+Exemplo:
+
+```python
+from notificador import NotificadorPreco
+
+notificador = NotificadorPreco(sendgrid_api_key='sua-chave-api')
+
+notificador.enviar_sendgrid(
+    email_destino='email@dominio.com',
+    produto_nome='Produto',
+    preco_atual=1000.00,
+    preco_meta=800.00
+)
+```
+
+### SMTP Gmail
+
+Gerar App Password em:
+
+myaccount.google.com/apppasswords
+
+Exemplo:
+
+```python
+notificador.enviar_email_smtp(
+    email_origem='email@gmail.com',
+    senha='app-password',
+    email_destino='destinatario@dominio.com',
+    produto_nome='Produto',
+    preco_atual=1000.00,
+    preco_meta=800.00
+)
+```
+
+---
+
+## 9. Segurança
+
+- Não versionar o arquivo .env
+- Não compartilhar credenciais
+- Alterar senhas padrão em produção
+- Utilizar gerenciamento de secrets em ambiente corporativo
+
+---
+
+## 10. Licença
 
 MIT License
-
-
-
-
-
